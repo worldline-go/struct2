@@ -1,3 +1,6 @@
+
+[![codecov](https://codecov.io/gh/worldline-go/struct2/branch/master/graph/badge.svg)](https://codecov.io/gh/worldline-go/struct2)
+
 # struct2
 
 This repository helps to work with struct, convert map and get information about that.
