@@ -1,7 +1,8 @@
-
-[![codecov](https://codecov.io/gh/worldline-go/struct2/branch/master/graph/badge.svg)](https://codecov.io/gh/worldline-go/struct2)
-
 # struct2
+
+[![Codecov](https://img.shields.io/codecov/c/github/worldline-go/struct2?logo=codecov&style=flat-square)](https://app.codecov.io/gh/worldline-go/struct2)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/worldline-go/struct2/Test?logo=github&style=flat-square&label=ci)](https://github.com/worldline-go/struct2/actions)
+[![Go Reference](https://pkg.go.dev/badge/github.com/worldline-go/struct2.svg)](https://pkg.go.dev/github.com/worldline-go/struct2)
 
 This repository helps to work with struct, convert map and get information about that.
 
