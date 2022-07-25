@@ -5,7 +5,7 @@ import (
 )
 
 func (d *Decoder) GetFields(s interface{}) []string {
-	v := interface2StructValue(s)
+	v := value2StructValue(reflect.ValueOf(s))
 
 	exportedFieldNames := []string{}
 

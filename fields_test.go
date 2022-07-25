@@ -45,6 +45,16 @@ func TestDecoder_GetFields(t *testing.T) {
 			},
 			want: []string{"test_2"},
 		},
+		{
+			name: "nil",
+			args: args{
+				s: (*struct {
+					test  string
+					Test2 int `struct:"test_2"`
+				})(nil),
+			},
+			want: []string{"test_2"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

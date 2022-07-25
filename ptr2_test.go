@@ -29,6 +29,27 @@ func TestPtr2Concrete(t *testing.T) {
 			want: "pointer",
 		},
 		{
+			name: "struct test",
+			args: args{
+				val: struct{ name string }{name: "struct"},
+			},
+			want: struct{ name string }{name: "struct"},
+		},
+		{
+			name: "pointer struct test",
+			args: args{
+				val: &struct{ name string }{name: "struct"},
+			},
+			want: struct{ name string }{name: "struct"},
+		},
+		{
+			name: "pointer struct test with nil",
+			args: args{
+				val: (*struct{ name string })(nil),
+			},
+			want: struct{ name string }{},
+		},
+		{
 			name: "nil string",
 			args: args{
 				val: (*string)(nil),

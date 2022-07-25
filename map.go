@@ -10,17 +10,24 @@ type configMap struct {
 }
 
 // MapOmitNested converts given struct to the map[string]interface{} without looking nested object.
-func (d *Decoder) MapOmitNested(s interface{}) map[string]interface{} {
-	return d.convertMap(s, configMap{omitNested: true})
+// Panic if input not a struct type.
+func (d *Decoder) MapOmitNested(input interface{}) map[string]interface{} {
+	return d.convertMap(input, configMap{omitNested: true})
 }
 
 // Map converts given struct to the map[string]interface{}.
-func (d *Decoder) Map(s interface{}) map[string]interface{} {
-	return d.convertMap(s, configMap{})
+// Panic if input not a struct type.
+func (d *Decoder) Map(input interface{}) map[string]interface{} {
+	return d.convertMap(input, configMap{})
 }
 
-func (d *Decoder) convertMap(s interface{}, config configMap) map[string]interface{} {
-	v := interface2StructValue(s)
+func (d *Decoder) convertMap(input interface{}, config configMap) map[string]interface{} {
+	inputV := reflect.ValueOf(input)
+	if isNil(inputV) {
+		return nil
+	}
+
+	v := value2StructValue(inputV)
 
 	out := make(map[string]interface{})
 
@@ -161,8 +168,7 @@ func (d *Decoder) nested(val reflect.Value) interface{} {
 		// only iterate over struct types, ie: map[string]StructType,
 		// map[string][]StructType,
 		if mapElem.Kind() == reflect.Struct ||
-			(mapElem.Kind() == reflect.Slice &&
-				mapElem.Elem().Kind() == reflect.Struct) {
+			(mapElem.Kind() == reflect.Slice && mapElem.Elem().Kind() == reflect.Struct) {
 			m := make(map[string]interface{}, val.Len())
 			for _, k := range val.MapKeys() {
 				m[k.String()] = d.nested(val.MapIndex(k))
@@ -187,8 +193,7 @@ func (d *Decoder) nested(val reflect.Value) interface{} {
 		// []string, co... We only iterate further if it's a struct.
 		// i.e []foo or []*foo
 		if val.Type().Elem().Kind() != reflect.Struct &&
-			!(val.Type().Elem().Kind() == reflect.Ptr &&
-				val.Type().Elem().Elem().Kind() == reflect.Struct) {
+			!(val.Type().Elem().Kind() == reflect.Ptr && val.Type().Elem().Elem().Kind() == reflect.Struct) {
 			finalVal = val.Interface()
 
 			break

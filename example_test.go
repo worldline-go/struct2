@@ -23,10 +23,10 @@ func SortPrint(m map[string]interface{}) {
 
 func Example() {
 	type ColorGroup struct {
-		ID     int        `struct:"id"`
-		Name   string     `struct:"name"`
-		Colors []string   `struct:"colors"`
-		Date   types.Time `struct:"time"`
+		ID     int        `json:"id"`
+		Name   string     `json:"name"`
+		Colors []string   `json:"colors"`
+		Date   types.Time `json:"time"`
 	}
 
 	d, _ := time.Parse(time.RFC3339, "2006-01-02T15:04:05Z")
@@ -38,9 +38,7 @@ func Example() {
 		Date:   types.Time{Time: d},
 	}
 
-	decoder := struct2.Decoder{}
-
-	result := decoder.Map(group)
+	result := (&struct2.Decoder{}).SetTagName("json").Map(group) // default tag name is "struct"
 
 	// fmt.Printf("%#v", result)
 	SortPrint(result)

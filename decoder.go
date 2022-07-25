@@ -1,9 +1,5 @@
 package struct2
 
-import (
-	"reflect"
-)
-
 // Decoder is main struct of struct2, holds config and functions.
 type Decoder struct {
 	// Tagname to lookup struct's field tag.
@@ -12,25 +8,20 @@ type Decoder struct {
 	Hooks []HookFunc
 }
 
+func (d *Decoder) SetTagName(t string) *Decoder {
+	d.TagName = t
+	return d
+}
+
+func (d *Decoder) SetHooks(hooks []HookFunc) *Decoder {
+	d.Hooks = hooks
+	return d
+}
+
 func (d *Decoder) tagName() string {
 	if d.TagName == "" {
 		return "struct"
 	}
 
 	return d.TagName
-}
-
-func interface2StructValue(s interface{}) reflect.Value {
-	v := reflect.ValueOf(s)
-
-	// pointer to struct
-	for v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-
-	if v.Kind() != reflect.Struct {
-		panic("not struct value")
-	}
-
-	return v
 }
