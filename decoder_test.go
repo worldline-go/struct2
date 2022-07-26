@@ -1,6 +1,7 @@
 package struct2
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -40,7 +41,7 @@ func Test_interface2StructValue(t *testing.T) {
 				}
 			}()
 
-			interface2StructValue(tt.args.s)
+			value2StructValue(reflect.ValueOf(tt.args.s))
 		})
 	}
 }

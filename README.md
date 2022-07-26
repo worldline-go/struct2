@@ -38,6 +38,9 @@ decoder := struct2.Decoder{
 
 // get map[string]interface{}
 result := decoder.Map(group)
+
+// or use one line
+// result := (&struct2.Decoder{}).SetTagName("db").Map(group) // default tag name is "struct"
 ```
 
 Custom decoder can be use in struct witch have `struct2.Hooker` interface.  

@@ -48,6 +48,16 @@ func TestDecoder_Map(t *testing.T) {
 			},
 		},
 		{
+			name: "nil test",
+			args: args{
+				s: (*struct {
+					Name string  `struct:"name"`
+					Ptr  *string `struct:"ptr,ptr2"`
+				})(nil),
+			},
+			want: nil,
+		},
+		{
 			name: "ptr2 test",
 			args: args{
 				s: struct {

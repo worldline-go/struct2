@@ -6,6 +6,8 @@ import (
 )
 
 // ErrContinueHook usable with HookFunc.
+// This error type not checking by decode.
+// Replacable by any error to continue to decode.
 var ErrContinueHook = errors.New("continue to decode")
 
 // Hooker interface for structs.
