@@ -182,6 +182,10 @@ func (d *Decoder) nested(val reflect.Value) interface{} {
 		// TODO(arslan): should this be optional?
 		finalVal = val.Interface()
 	case reflect.Slice, reflect.Array:
+		if val.Type().Kind() == reflect.Ptr {
+			val = val.Elem()
+		}
+
 		if val.Type().Kind() == reflect.Interface {
 			finalVal = val.Interface()
 
