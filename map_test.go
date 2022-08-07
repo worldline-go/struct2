@@ -117,6 +117,25 @@ func TestDecoder_Map(t *testing.T) {
 				"train": train,
 			},
 		},
+		{
+			name: "slice pointer of struct",
+			args: args{
+				s: struct {
+					Name  string   `struct:"name"`
+					Ptr   *string  `struct:"ptr,ptr2"`
+					Train *[]Train `struct:"train"`
+				}{
+					Name:  "abc",
+					Ptr:   str2Ptr("pointer"),
+					Train: &[]Train{train},
+				},
+			},
+			want: map[string]interface{}{
+				"name":  "abc",
+				"ptr":   "pointer",
+				"train": []interface{}{map[string]interface{}{"wagon": 5}},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
