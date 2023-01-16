@@ -54,21 +54,26 @@ func (d *Decoder) decode(name string, input interface{}, outputVal reflect.Value
 		return nil
 	}
 
-	// If we have hooks, run them
-	if len(d.Hooks) > 0 {
-		// custom hooks
-		for _, hook := range d.Hooks {
-			if hookResult, err := hook(inputVal); err == nil {
-				input = hookResult
+	// custom hooks
+	for _, hook := range d.Hooks {
+		if hookResult, err := hook(inputVal); err == nil {
+			input = hookResult
 
-				break
-			}
+			break
 		}
 	}
 
 	// type hook
 	if hook, ok := input.(Hooker); ok {
 		input = hook.Struct2Hook()
+	}
+
+	for _, hookDecode := range d.HooksDecode {
+		var err error
+		input, err = hookDecode(inputVal.Type(), outputVal.Type(), input)
+		if err != nil {
+			return fmt.Errorf("failed hook decode function: %w", err)
+		}
 	}
 
 	var err error

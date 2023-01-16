@@ -17,3 +17,6 @@ type Hooker interface {
 
 // HookFunc get reflect.Value to modify custom in decoder.
 type HookFunc func(reflect.Value) (interface{}, error)
+
+// HookDecodeFunc get input, output and data and return modified data.
+type HookDecodeFunc func(reflect.Type, reflect.Type, interface{}) (interface{}, error)

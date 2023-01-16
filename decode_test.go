@@ -3,12 +3,14 @@ package struct2
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestDecoder_Decode(t *testing.T) {
 	type fields struct {
 		TagName               string
 		Hooks                 []HookFunc
+		HooksDecode           []HookDecodeFunc
 		WeaklyTypedInput      bool
 		ZeroFields            bool
 		Squash                bool
@@ -115,6 +117,50 @@ func TestDecoder_Decode(t *testing.T) {
 			},
 		},
 		{
+			name: "hooksdecode",
+			fields: fields{
+				WeaklyIgnoreSeperator: true,
+				HooksDecode: []HookDecodeFunc{
+					func(t1, t2 reflect.Type, data interface{}) (interface{}, error) {
+						if t2 != reflect.TypeOf(time.Duration(0)) {
+							return data, nil
+						}
+
+						switch t1.Kind() {
+						case reflect.String:
+							return time.ParseDuration(data.(string))
+						case reflect.Int:
+							return time.Duration(data.(int)), nil
+						case reflect.Int64:
+							return time.Duration(data.(int64)), nil
+						case reflect.Float64:
+							return time.Duration(data.(float64)), nil
+						default:
+							return data, nil
+						}
+					},
+				},
+			},
+			args: args{
+				input: map[string]interface{}{
+					"test_x": "5s",
+					"test_y": 1_000_000_000,
+				},
+				output: &struct {
+					Test  time.Duration `struct:"test X"`
+					TestY time.Duration `struct:"test_y"`
+				}{},
+			},
+			wantErr: false,
+			want: &struct {
+				Test  time.Duration `struct:"test X"`
+				TestY time.Duration `struct:"test_y"`
+			}{
+				Test:  time.Duration(5 * time.Second),
+				TestY: time.Duration(1 * time.Second),
+			},
+		},
+		{
 			name: "copy []byte",
 			args: args{
 				input:  append(make([]byte, 0, 100), []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}...),
@@ -129,6 +175,7 @@ func TestDecoder_Decode(t *testing.T) {
 			d := &Decoder{
 				TagName:               tt.fields.TagName,
 				Hooks:                 tt.fields.Hooks,
+				HooksDecode:           tt.fields.HooksDecode,
 				WeaklyTypedInput:      tt.fields.WeaklyTypedInput,
 				ZeroFields:            tt.fields.ZeroFields,
 				Squash:                tt.fields.Squash,

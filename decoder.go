@@ -13,6 +13,9 @@ type Decoder struct {
 
 	// Mapstructure operations
 
+	// HooksDecode to modify data before decode.
+	HooksDecode []HookDecodeFunc
+
 	// WeaklyTypedInput is true, the decoder will make the following
 	// "weak" conversions:
 	//
@@ -67,6 +70,11 @@ func (d *Decoder) SetTagName(t string) *Decoder {
 
 func (d *Decoder) SetHooks(hooks []HookFunc) *Decoder {
 	d.Hooks = hooks
+	return d
+}
+
+func (d *Decoder) SetHooksDecode(hooksDecode []HookDecodeFunc) *Decoder {
+	d.HooksDecode = hooksDecode
 	return d
 }
 
