@@ -1,6 +1,7 @@
 package types
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
@@ -15,7 +16,7 @@ var _ struct2.Hooker = Time{}
 
 // UnmarshalJSON custom for fit other time layouts.
 func (t *Time) UnmarshalJSON(b []byte) error {
-	if string(b) == "null" {
+	if bytes.Equal(b, []byte("null")) {
 		return nil
 	}
 

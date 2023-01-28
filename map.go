@@ -84,7 +84,26 @@ FIELDS:
 		}
 
 		// type hook
-		if hook, ok := val.Interface().(Hooker); ok {
+		var hook Hooker
+		if hookSelect, ok := val.Interface().(Hooker); ok {
+			hook = hookSelect
+		} else {
+			addrVal := reflect.New(val.Type())
+			reflect.Indirect(addrVal).Set(val)
+
+			if hookSelect, ok := addrVal.Interface().(Hooker); ok {
+				hook = hookSelect
+			}
+		}
+
+		if hook != nil {
+			if val.Type().Kind() == reflect.Ptr && val.IsNil() {
+				// nil pointer call to value receiver
+				out[name] = nil
+
+				continue
+			}
+
 			if ptr2 {
 				out[name] = Ptr2Concrete(hook.Struct2Hook())
 			} else {
