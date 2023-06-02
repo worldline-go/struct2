@@ -33,7 +33,7 @@ func (d *Decoder) convertMap(input interface{}, config configMap) map[string]int
 
 	fields := []reflect.StructField{}
 
-	getFields(v, d.tagName(), func(sf reflect.StructField) {
+	d.getFields(v, func(sf reflect.StructField) {
 		fields = append(fields, sf)
 	})
 
@@ -45,7 +45,7 @@ FIELDS:
 
 		var finalVal interface{}
 
-		tagName, tagOpts := parseTag(field.Tag.Get(d.tagName()))
+		tagName, tagOpts := d.parseTag(field)
 		if tagName != "" {
 			name = tagName
 		}
@@ -160,7 +160,7 @@ func (d *Decoder) nested(val reflect.Value) interface{} {
 	case reflect.Struct:
 		exportedFieldCount := 0
 
-		getFields(v, d.tagName(), func(sf reflect.StructField) {
+		d.getFields(v, func(sf reflect.StructField) {
 			if isFieldExported(sf) {
 				exportedFieldCount++
 			}
