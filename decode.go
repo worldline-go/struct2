@@ -524,13 +524,7 @@ func (d *Decoder) decodeMapFromStruct(name string, dataVal reflect.Value, val re
 			return fmt.Errorf("cannot assign type '%s' to map value field of type '%s'", v.Type(), valMap.Type().Elem())
 		}
 
-		selectedTagName := d.tagName()
-		tagValue := f.Tag.Get(selectedTagName)
-		if tagValue == "" && d.BackupTagName != "" {
-			selectedTagName = d.BackupTagName
-			tagValue = f.Tag.Get(selectedTagName)
-		}
-
+		tagValue, selectedTagName := d.getTagValue(f)
 		keyName := f.Name
 
 		if tagValue == "" && d.IgnoreUntaggedFields {
@@ -904,11 +898,7 @@ func (d *Decoder) decodeStructFromMap(name string, dataVal, val reflect.Value) e
 			remain := false
 
 			// We always parse the tags cause we're looking for other tags too
-			tagValue := fieldType.Tag.Get(d.tagName())
-			if tagValue == "" && d.BackupTagName != "" {
-				tagValue = fieldType.Tag.Get(d.BackupTagName)
-			}
-
+			tagValue, _ := d.getTagValue(fieldType)
 			tagParts := strings.Split(tagValue, ",")
 			for _, tag := range tagParts[1:] {
 				if tag == "squash" {
@@ -947,11 +937,7 @@ func (d *Decoder) decodeStructFromMap(name string, dataVal, val reflect.Value) e
 		field, fieldValue := f.field, f.val
 		fieldName := field.Name
 
-		tagValue := field.Tag.Get(d.tagName())
-		if tagValue == "" && d.BackupTagName != "" {
-			tagValue = field.Tag.Get(d.BackupTagName)
-		}
-
+		tagValue, _ := d.getTagValue(field)
 		tagValue = strings.SplitN(tagValue, ",", 2)[0]
 		if tagValue != "" {
 			fieldName = tagValue

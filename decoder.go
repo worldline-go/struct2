@@ -1,6 +1,9 @@
 package struct2
 
-import "regexp"
+import (
+	"reflect"
+	"regexp"
+)
 
 var reIgnoreSeperator = regexp.MustCompile(`[-_ ]`)
 
@@ -84,4 +87,19 @@ func (d *Decoder) tagName() string {
 	}
 
 	return d.TagName
+}
+
+func (d *Decoder) getTagValue(field reflect.StructField) (string, string) {
+	selectedTagName := d.tagName()
+	tagValue := field.Tag.Get(selectedTagName)
+	if tagValue == "" && d.BackupTagName != "" {
+		selectedTagName = d.BackupTagName
+		tagValue = field.Tag.Get(selectedTagName)
+	}
+	return tagValue, selectedTagName
+}
+
+func (d *Decoder) parseTag(field reflect.StructField) (string, tagOptions) {
+	tagValue, _ := d.getTagValue(field)
+	return parseTag(tagValue)
 }

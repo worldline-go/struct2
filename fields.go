@@ -9,9 +9,10 @@ func (d *Decoder) GetFields(s interface{}) []string {
 
 	exportedFieldNames := []string{}
 
-	getFields(v, d.tagName(), func(sf reflect.StructField) {
+	d.getFields(v, func(sf reflect.StructField) {
 		if isFieldExported(sf) {
-			tagName, _ := parseTag(sf.Tag.Get(d.tagName()))
+
+			tagName, _ := d.parseTag(sf)
 			if tagName == "" {
 				tagName = sf.Name
 			}
@@ -27,13 +28,14 @@ func isFieldExported(f reflect.StructField) bool {
 	return f.PkgPath == ""
 }
 
-func getFields(v reflect.Value, tagName string, fn func(reflect.StructField)) {
+func (d *Decoder) getFields(v reflect.Value, fn func(reflect.StructField)) {
 	t := v.Type()
 
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		if tag := field.Tag.Get(tagName); tag == "-" {
+		tagValue, _ := d.getTagValue(field)
+		if tag := tagValue; tag == "-" {
 			continue
 		}
 
