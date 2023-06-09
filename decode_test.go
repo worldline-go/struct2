@@ -7,6 +7,8 @@ import (
 )
 
 func TestDecoder_Decode(t *testing.T) {
+	timeNow := time.Now()
+
 	type fields struct {
 		TagName               string
 		Hooks                 []HookFunc
@@ -45,6 +47,90 @@ func TestDecoder_Decode(t *testing.T) {
 				Test string `struct:"test"`
 			}{
 				Test: "test",
+			},
+		},
+		{
+			name: "test",
+			fields: fields{
+				WeaklyTypedInput: true,
+			},
+			args: args{
+				input: map[string]interface{}{
+					"string":  "test",
+					"bool":    "True",
+					"int":     1,
+					"float64": 1.1,
+					"float32": func() interface{} { return 1.1 }(),
+					"byte":    1,
+					"rune":    '#',
+					"uint":    1,
+					"uint8":   1,
+					"uint16":  1,
+					"uint32":  1,
+					"uint64":  1,
+					"int8":    1,
+					"int16":   1,
+					"int32":   1,
+					"int64":   1,
+					"time":    func() interface{} { return timeNow }(),
+				},
+				output: &struct {
+					String  string    `struct:"string"`
+					Bool    bool      `struct:"bool"`
+					Int     int       `struct:"int"`
+					Float64 float64   `struct:"float64"`
+					Float32 float32   `struct:"float32"`
+					Byte    byte      `struct:"byte"`
+					Rune    rune      `struct:"rune"`
+					Uint    uint      `struct:"uint"`
+					Uint8   uint8     `struct:"uint8"`
+					Uint16  uint16    `struct:"uint16"`
+					Uint32  uint32    `struct:"uint32"`
+					Uint64  uint64    `struct:"uint64"`
+					Int8    int8      `struct:"int8"`
+					Int16   int16     `struct:"int16"`
+					Int32   int32     `struct:"int32"`
+					Int64   int64     `struct:"int64"`
+					Time    time.Time `struct:"time"`
+				}{},
+			},
+			wantErr: false,
+			want: &struct {
+				String  string    `struct:"string"`
+				Bool    bool      `struct:"bool"`
+				Int     int       `struct:"int"`
+				Float64 float64   `struct:"float64"`
+				Float32 float32   `struct:"float32"`
+				Byte    byte      `struct:"byte"`
+				Rune    rune      `struct:"rune"`
+				Uint    uint      `struct:"uint"`
+				Uint8   uint8     `struct:"uint8"`
+				Uint16  uint16    `struct:"uint16"`
+				Uint32  uint32    `struct:"uint32"`
+				Uint64  uint64    `struct:"uint64"`
+				Int8    int8      `struct:"int8"`
+				Int16   int16     `struct:"int16"`
+				Int32   int32     `struct:"int32"`
+				Int64   int64     `struct:"int64"`
+				Time    time.Time `struct:"time"`
+			}{
+				String:  "test",
+				Bool:    true,
+				Int:     1,
+				Float64: 1.1,
+				Float32: 1.1,
+				Byte:    1,
+				Rune:    '#',
+				Uint:    1,
+				Uint8:   1,
+				Uint16:  1,
+				Uint32:  1,
+				Uint64:  1,
+				Int8:    1,
+				Int16:   1,
+				Int32:   1,
+				Int64:   1,
+				Time:    timeNow,
 			},
 		},
 		{

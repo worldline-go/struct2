@@ -34,8 +34,7 @@ func (d *Decoder) getFields(v reflect.Value, fn func(reflect.StructField)) {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		tagValue, _ := d.getTagValue(field)
-		if tag := tagValue; tag == "-" {
+		if tagValue, _ := d.getTagValue(field); tagValue == "-" {
 			continue
 		}
 

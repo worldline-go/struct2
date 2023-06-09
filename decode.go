@@ -13,7 +13,7 @@ func errorConcat(err []error) error {
 		return nil
 	}
 
-	var errStr []string
+	errStr := make([]string, 0, len(err))
 	for i, e := range err {
 		errStr = append(errStr, fmt.Sprintf("%d- %s", i+1, e))
 	}
@@ -156,13 +156,13 @@ func (d *Decoder) decodeBasic(name string, data interface{}, val reflect.Value) 
 			copied = true
 
 			// Make *T
-			copy := reflect.New(elem.Type())
+			copyV := reflect.New(elem.Type())
 
 			// *T = elem
-			copy.Elem().Set(elem)
+			copyV.Elem().Set(elem)
 
 			// Set elem so we decode into it
-			elem = copy
+			elem = copyV
 		}
 
 		// Decode. If we have an error then return. We also return right
@@ -173,6 +173,7 @@ func (d *Decoder) decodeBasic(name string, data interface{}, val reflect.Value) 
 
 		// If we're a copy, we need to set te final result
 		val.Set(elem.Elem())
+
 		return nil
 	}
 
@@ -197,6 +198,7 @@ func (d *Decoder) decodeBasic(name string, data interface{}, val reflect.Value) 
 	}
 
 	val.Set(dataVal)
+
 	return nil
 }
 
@@ -439,10 +441,11 @@ func (d *Decoder) decodeMap(name string, data interface{}, val reflect.Value) er
 	}
 }
 
-func (d *Decoder) decodeMapFromSlice(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
+func (d *Decoder) decodeMapFromSlice(name string, dataVal, val, valMap reflect.Value) error {
 	// Special case for BC reasons (covered by tests)
 	if dataVal.Len() == 0 {
 		val.Set(valMap)
+
 		return nil
 	}
 
@@ -458,7 +461,7 @@ func (d *Decoder) decodeMapFromSlice(name string, dataVal reflect.Value, val ref
 	return nil
 }
 
-func (d *Decoder) decodeMapFromMap(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
+func (d *Decoder) decodeMapFromMap(name string, dataVal, val, valMap reflect.Value) error {
 	valType := val.Type()
 	valKeyType := valType.Key()
 	valElemType := valType.Elem()
@@ -487,6 +490,7 @@ func (d *Decoder) decodeMapFromMap(name string, dataVal reflect.Value, val refle
 		currentKey := reflect.Indirect(reflect.New(valKeyType))
 		if err := d.decode(fieldName, k.Interface(), currentKey); err != nil {
 			errors = append(errors, err)
+
 			continue
 		}
 
@@ -495,6 +499,7 @@ func (d *Decoder) decodeMapFromMap(name string, dataVal reflect.Value, val refle
 		currentVal := reflect.Indirect(reflect.New(valElemType))
 		if err := d.decode(fieldName, v, currentVal); err != nil {
 			errors = append(errors, err)
+
 			continue
 		}
 
@@ -507,7 +512,7 @@ func (d *Decoder) decodeMapFromMap(name string, dataVal reflect.Value, val refle
 	return errorConcat(errors)
 }
 
-func (d *Decoder) decodeMapFromStruct(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
+func (d *Decoder) decodeMapFromStruct(name string, dataVal, val, valMap reflect.Value) error {
 	typ := dataVal.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		// Get the StructField first since this is a cheap operation. If the
@@ -684,6 +689,7 @@ func (d *Decoder) decodeSlice(name string, data interface{}, val reflect.Value) 
 			case dataValKind == reflect.Map:
 				if dataVal.Len() == 0 {
 					val.Set(reflect.MakeSlice(sliceType, 0, 0))
+
 					return nil
 				}
 				// Create slice of maps of other sizes
@@ -757,6 +763,7 @@ func (d *Decoder) decodeArray(name string, data interface{}, val reflect.Value) 
 				case dataValKind == reflect.Map:
 					if dataVal.Len() == 0 {
 						val.Set(reflect.Zero(arrayType))
+
 						return nil
 					}
 
@@ -807,6 +814,7 @@ func (d *Decoder) decodeStruct(name string, data interface{}, val reflect.Value)
 	// then we just set it directly instead of recursing into the structure.
 	if dataVal.Type() == val.Type() {
 		val.Set(dataVal)
+
 		return nil
 	}
 

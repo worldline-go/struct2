@@ -25,7 +25,7 @@ type ColorGroup struct {
 	// Coordinate field will be same struct, not touching
 	Coordinate Coordinate `db:"coordinate,omitnested"`
 	// Secret field will be ignored
-	Secret string `db:"-"`
+	Secret string `cfg:"-"`
 }
 
 type Inner struct {
@@ -91,6 +91,7 @@ var mapExamples = map[string]exampleData{
 func Test_Data(t *testing.T) {
 	decoder := struct2.Decoder{
 		TagName:               "db",
+		BackupTagName:         "cfg",
 		WeaklyDashUnderscore:  true,
 		WeaklyIgnoreSeperator: true,
 		WeaklyTypedInput:      true,
