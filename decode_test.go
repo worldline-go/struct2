@@ -31,8 +31,7 @@ func TestDecoder_Decode(t *testing.T) {
 		want    interface{}
 	}{
 		{
-			name:   "test",
-			fields: fields{},
+			name: "test",
 			args: args{
 				input: map[string]interface{}{
 					"test": "test",
@@ -46,6 +45,27 @@ func TestDecoder_Decode(t *testing.T) {
 				Test string `struct:"test"`
 			}{
 				Test: "test",
+			},
+		},
+		{
+			name: "nil struct",
+			args: args{
+				input: map[string]interface{}{
+					"abc": "x",
+				},
+				output: &struct {
+					Test *struct {
+						Abc string `struct:"abc"`
+					} `struct:"test"`
+				}{},
+			},
+			wantErr: false,
+			want: &struct {
+				Test *struct {
+					Abc string `struct:"abc"`
+				} `struct:"test"`
+			}{
+				Test: nil,
 			},
 		},
 		{

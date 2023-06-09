@@ -1,7 +1,12 @@
 .DEFAULT_GOAL := help
 
-.PHONY: test coverage help html html-gen html-wsl
+.PHONY: example test coverage help html html-gen html-wsl
 
+test-data: export DATA ?= ColorGroup
+test-data: ## Run data test
+	@go test -timeout 30s -v -run ^Test_Data$
+
+test: export DATA ?= ColorGroup
 test: ## Run unit tests
 	@go test -race -cover ./...
 

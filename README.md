@@ -32,8 +32,8 @@ type ColorGroup struct {
     // custom type with implemented Hooker interface
     // covertion result to time.Time
     Date types.Time `db:"time"`
-    // unkown type but to untouch it add omitnested to keep that struct type
-    RGB *null.String `db:rgb,omitempty,omitnested`
+	// RGB unknown type but to untouch it add omitnested to keep that struct type
+	RGB *rgb `db:"rgb,omitempty,omitnested"`
 }
 
 //...

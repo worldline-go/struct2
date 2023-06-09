@@ -86,7 +86,7 @@ func TestDecoder_Map(t *testing.T) {
 					Name: "abc",
 					Ptr:  str2Ptr("pointer"),
 					Train: struct {
-						Wagon *int "struct:\"wagon,ptr2\""
+						Wagon *int `struct:"wagon,ptr2"`
 					}{Wagon: int2Ptr(5)},
 				},
 			},
