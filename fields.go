@@ -33,7 +33,9 @@ func (d *Decoder) getFields(v reflect.Value, fn func(reflect.StructField)) {
 
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-
+		if !field.IsExported() {
+			continue
+		}
 		if tagValue, _ := d.getTagValue(field); tagValue == "-" {
 			continue
 		}

@@ -31,6 +31,22 @@ func TestDecoder_Map(t *testing.T) {
 		args    args
 		want    map[string]interface{}
 	}{
+
+		{
+			name: "unexported test",
+			args: args{
+				s: struct {
+					Name       string `struct:"name"`
+					unexported string
+				}{
+					Name:       "abc",
+					unexported: "unexported",
+				},
+			},
+			want: map[string]interface{}{
+				"name": "abc",
+			},
+		},
 		{
 			name: "simple test",
 			args: args{
