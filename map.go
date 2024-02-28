@@ -65,10 +65,7 @@ FIELDS:
 			continue
 		}
 
-		ptr2 := false
-		if tagOpts.Has("ptr2") {
-			ptr2 = true
-		}
+		ptr2 := d.ForcePtr2 || tagOpts.Has("ptr2")
 
 		// custom hooks
 		for _, hook := range d.Hooks {

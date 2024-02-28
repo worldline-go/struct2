@@ -64,6 +64,9 @@ type Decoder struct {
 	// WeaklyIgnoreSeperator ignore seperator on map to struct. variable_name == variablename
 	// values are -, _ and space.
 	WeaklyIgnoreSeperator bool
+
+	// ForcePtr2 assume `struct:",ptr2` on all pointer struct fields.
+	ForcePtr2 bool
 }
 
 func (d *Decoder) SetTagName(t string) *Decoder {

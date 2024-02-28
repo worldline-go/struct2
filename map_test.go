@@ -17,6 +17,9 @@ func TestDecoder_Map(t *testing.T) {
 	type Train struct {
 		Wagon *int `struct:"wagon,ptr2"`
 	}
+	type TrainNoPtr2 struct {
+		Wagon *int `struct:"wagon"`
+	}
 
 	train := Train{
 		Wagon: int2Ptr(5),
@@ -150,6 +153,28 @@ func TestDecoder_Map(t *testing.T) {
 				"name":  "abc",
 				"ptr":   "pointer",
 				"train": []interface{}{map[string]interface{}{"wagon": 5}},
+			},
+		},
+		{
+			name:    "pointer with ForcePtr2",
+			decoder: Decoder{ForcePtr2: true},
+			args: args{
+				s: struct {
+					Name  string      `struct:"name"`
+					Ptr   *string     `struct:"ptr"`
+					Train TrainNoPtr2 `struct:"train"`
+				}{
+					Name:  "abc",
+					Ptr:   str2Ptr("pointer"),
+					Train: TrainNoPtr2{},
+				},
+			},
+			want: map[string]interface{}{
+				"name": "abc",
+				"ptr":  "pointer",
+				"train": map[string]interface{}{
+					"wagon": 0,
+				},
 			},
 		},
 	}
