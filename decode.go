@@ -532,6 +532,10 @@ func (d *Decoder) decodeMapFromStruct(name string, dataVal, val, valMap reflect.
 		tagValue, selectedTagName := d.getTagValue(f)
 		keyName := f.Name
 
+		if d.OuputCamelCase {
+			keyName = strings.ToLower(keyName[0:1]) + keyName[1:]
+		}
+
 		if tagValue == "" && d.IgnoreUntaggedFields {
 			continue
 		}

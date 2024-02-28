@@ -70,6 +70,9 @@ type Decoder struct {
 
 	// OmitNullPtr omits nil pointers, in the map.
 	OmitNilPtr bool
+
+	// OutputCamelCase will convert map keys to camel case.
+	OuputCamelCase bool
 }
 
 func (d *Decoder) SetTagName(t string) *Decoder {

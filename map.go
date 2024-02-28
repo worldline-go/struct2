@@ -3,6 +3,7 @@ package struct2
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 type configMap struct {
@@ -41,8 +42,11 @@ FIELDS:
 	for _, field := range fields {
 		name := field.Name
 		val := v.FieldByName(name)
-		isSubStruct := false
+		if d.OuputCamelCase {
+			name = strings.ToLower(name[0:1]) + name[1:]
+		}
 
+		isSubStruct := false
 		var finalVal interface{}
 
 		tagName, tagOpts := d.parseTag(field)
