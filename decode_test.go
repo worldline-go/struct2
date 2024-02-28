@@ -1,7 +1,9 @@
 package struct2
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -20,6 +22,7 @@ func TestDecoder_Decode(t *testing.T) {
 		BackupTagName         string
 		WeaklyDashUnderscore  bool
 		WeaklyIgnoreSeperator bool
+		NoRemainFields        bool
 	}
 	type args struct {
 		input  interface{}
@@ -275,6 +278,94 @@ func TestDecoder_Decode(t *testing.T) {
 			wantErr: nil,
 			want:    func() interface{} { v := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; return &v }(),
 		},
+		{
+			name: "remain",
+			args: args{
+				input: map[string]interface{}{
+					"test":       "test",
+					"testStruct": map[string]interface{}{"test": "test", "other": "other"},
+					"testArray": []map[string]interface{}{
+						{"test": "test", "other": "other"},
+					},
+					"other":   "other",
+					"another": "another",
+				},
+				output: &struct {
+					Test       string
+					TestStruct struct {
+						Test   string
+						Remain map[string]interface{} `struct:",remain"`
+					}
+					TestArray []struct {
+						Test   string
+						Remain map[string]interface{} `struct:",remain"`
+					}
+					Remain map[string]interface{} `struct:",remain"`
+				}{},
+			},
+			wantErr: nil,
+			want: &struct {
+				Test       string
+				TestStruct struct {
+					Test   string
+					Remain map[string]interface{} `struct:",remain"`
+				}
+				TestArray []struct {
+					Test   string
+					Remain map[string]interface{} `struct:",remain"`
+				}
+				Remain map[string]interface{} `struct:",remain"`
+			}{
+				Test: "test",
+				TestStruct: struct {
+					Test   string
+					Remain map[string]interface{} `struct:",remain"`
+				}{
+					Test:   "test",
+					Remain: map[string]interface{}{"other": "other"},
+				},
+				TestArray: []struct {
+					Test   string
+					Remain map[string]interface{} `struct:",remain"`
+				}{
+					{
+						Test:   "test",
+						Remain: map[string]interface{}{"other": "other"},
+					},
+				},
+				Remain: map[string]interface{}{
+					"other":   "other",
+					"another": "another",
+				},
+			},
+		},
+		{
+			name: "NoRemainFields",
+			fields: fields{
+				NoRemainFields: true,
+			},
+			args: args{
+				input: map[string]interface{}{
+					"test":   "test",
+					"test_x": "testx",
+					"other":  "other",
+				},
+				output: &struct {
+					Test   string
+					Test_x string
+				}{},
+			},
+			wantErr: fmt.Errorf("%d error(s) decoding:\n\n%s", 1, strings.Join([]string{
+				"1- no remain field for unused keys: map[other:{}]",
+			}, "\n")),
+			want: &struct {
+				Test   string
+				Test_x string
+			}{
+				Test:   "test",
+				Test_x: "testx",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -289,6 +380,7 @@ func TestDecoder_Decode(t *testing.T) {
 				BackupTagName:         tt.fields.BackupTagName,
 				WeaklyDashUnderscore:  tt.fields.WeaklyDashUnderscore,
 				WeaklyIgnoreSeperator: tt.fields.WeaklyIgnoreSeperator,
+				NoRemainFields:        tt.fields.NoRemainFields,
 			}
 			if err := d.Decode(tt.args.input, tt.args.output); !reflect.DeepEqual(err, tt.wantErr) {
 				t.Errorf("Decoder.Decode() error = %v, wantErr %v", err, tt.wantErr)
