@@ -29,7 +29,7 @@ func TestDecoder_Decode(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		wantErr bool
+		wantErr error
 		want    interface{}
 	}{
 		{
@@ -42,7 +42,7 @@ func TestDecoder_Decode(t *testing.T) {
 					Test string `struct:"test"`
 				}{},
 			},
-			wantErr: false,
+			wantErr: nil,
 			want: &struct {
 				Test string `struct:"test"`
 			}{
@@ -94,7 +94,7 @@ func TestDecoder_Decode(t *testing.T) {
 					Time    time.Time `struct:"time"`
 				}{},
 			},
-			wantErr: false,
+			wantErr: nil,
 			want: &struct {
 				String  string    `struct:"string"`
 				Bool    bool      `struct:"bool"`
@@ -145,7 +145,7 @@ func TestDecoder_Decode(t *testing.T) {
 					} `struct:"test"`
 				}{},
 			},
-			wantErr: false,
+			wantErr: nil,
 			want: &struct {
 				Test *struct {
 					Abc string `struct:"abc"`
@@ -175,7 +175,7 @@ func TestDecoder_Decode(t *testing.T) {
 					Test string `struct:"test"`
 				}{},
 			},
-			wantErr: false,
+			wantErr: nil,
 			want: &struct {
 				Test string `struct:"test"`
 			}{
@@ -195,7 +195,7 @@ func TestDecoder_Decode(t *testing.T) {
 					Test string `struct:"test-x"`
 				}{},
 			},
-			wantErr: false,
+			wantErr: nil,
 			want: &struct {
 				Test string `struct:"test-x"`
 			}{
@@ -215,7 +215,7 @@ func TestDecoder_Decode(t *testing.T) {
 					Test string `struct:"test X"`
 				}{},
 			},
-			wantErr: false,
+			wantErr: nil,
 			want: &struct {
 				Test string `struct:"test X"`
 			}{
@@ -257,7 +257,7 @@ func TestDecoder_Decode(t *testing.T) {
 					TestY time.Duration `struct:"test_y"`
 				}{},
 			},
-			wantErr: false,
+			wantErr: nil,
 			want: &struct {
 				Test  time.Duration `struct:"test X"`
 				TestY time.Duration `struct:"test_y"`
@@ -272,7 +272,7 @@ func TestDecoder_Decode(t *testing.T) {
 				input:  append(make([]byte, 0, 100), []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}...),
 				output: func() interface{} { v := make([]byte, 0, 10); return &v }(),
 			},
-			wantErr: false,
+			wantErr: nil,
 			want:    func() interface{} { v := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; return &v }(),
 		},
 	}
@@ -290,7 +290,7 @@ func TestDecoder_Decode(t *testing.T) {
 				WeaklyDashUnderscore:  tt.fields.WeaklyDashUnderscore,
 				WeaklyIgnoreSeperator: tt.fields.WeaklyIgnoreSeperator,
 			}
-			if err := d.Decode(tt.args.input, tt.args.output); (err != nil) != tt.wantErr {
+			if err := d.Decode(tt.args.input, tt.args.output); !reflect.DeepEqual(err, tt.wantErr) {
 				t.Errorf("Decoder.Decode() error = %v, wantErr %v", err, tt.wantErr)
 
 				return
