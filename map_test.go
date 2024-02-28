@@ -206,6 +206,50 @@ func TestDecoder_Map(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "ouput with OuputCamelCase",
+			decoder: Decoder{
+				OuputCamelCase: true,
+			},
+			args: args{
+				s: struct {
+					Name     string
+					Name2    string `struct:"Name2"`
+					Train    Train
+					TrainPtr *Train
+					Trains   []Train
+				}{
+					Name:  "abc",
+					Name2: "def",
+					Train: Train{
+						Wagon: int2Ptr(5),
+					},
+					TrainPtr: &Train{
+						Wagon: int2Ptr(5),
+					},
+					Trains: []Train{
+						{
+							Wagon: int2Ptr(5),
+						},
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"name":  "abc",
+				"Name2": "def",
+				"train": map[string]interface{}{
+					"wagon": 5,
+				},
+				"trainPtr": map[string]interface{}{
+					"wagon": 5,
+				},
+				"trains": []interface{}{
+					map[string]interface{}{
+						"wagon": 5,
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
