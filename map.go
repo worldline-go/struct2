@@ -56,6 +56,10 @@ FIELDS:
 			continue
 		}
 
+		if d.OmitNilPtr && val.Kind() == reflect.Ptr && val.IsNil() {
+			continue
+		}
+
 		if tagOpts.Has("string") {
 			s, ok := val.Interface().(fmt.Stringer)
 			if ok {

@@ -177,6 +177,35 @@ func TestDecoder_Map(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:    "pointer with OmitNilPtr",
+			decoder: Decoder{OmitNilPtr: true},
+			args: args{
+				s: struct {
+					Name     string   `struct:"name"`
+					Ptr      *string  `struct:"ptr,ptr2"`
+					Train    Train    `struct:"train"`
+					TrainPtr *Train   `struct:"trainPtr"`
+					Trains   *[]Train `struct:"trains"`
+				}{
+					Name:     "abc",
+					Ptr:      nil,
+					Train:    Train{},
+					TrainPtr: &Train{},
+					Trains: &[]Train{
+						{},
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"name":     "abc",
+				"train":    map[string]interface{}{},
+				"trainPtr": map[string]interface{}{},
+				"trains": []interface{}{
+					map[string]interface{}{},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

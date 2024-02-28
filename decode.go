@@ -551,6 +551,10 @@ func (d *Decoder) decodeMapFromStruct(name string, dataVal, val, valMap reflect.
 				continue
 			}
 
+			if d.OmitNilPtr && v.Kind() == reflect.Ptr && isEmptyValue(v) {
+				continue
+			}
+
 			// If "squash" is specified in the tag, we squash the field down.
 			squash = squash || strings.Contains(tagValue[index+1:], "squash")
 			if squash {

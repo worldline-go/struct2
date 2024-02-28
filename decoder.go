@@ -67,6 +67,9 @@ type Decoder struct {
 
 	// ForcePtr2 assume `struct:",ptr2` on all pointer struct fields.
 	ForcePtr2 bool
+
+	// OmitNullPtr omits nil pointers, in the map.
+	OmitNilPtr bool
 }
 
 func (d *Decoder) SetTagName(t string) *Decoder {
