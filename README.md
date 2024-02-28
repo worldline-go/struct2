@@ -20,7 +20,7 @@ go get github.com/worldline-go/struct2
 
 Get decoder and run `Map` method, default looking the `struct` tag in struct.
 
-Supported tags: `-`, `omitempty`, `string`, `ptr2`, `omitnested`, `flatten`.
+Supported tags: `-`, `omitempty`, `string`, `ptr2`, `omitnested`, `flatten`, `remain`.
 
 Convertion order is __`-`, `omitempty`, `string`, `ptr2`, custom hook function, hooker interface, `omitnested` + `flatten`__
 
@@ -59,8 +59,10 @@ Check documentation examples.
 
 __omitnested__: very helpful to don't want to touch data.
 
-__ptr2__: convert pointer to the concrete value, if pointer is nil new value generating.
+__ptr2__: convert pointer to the concrete value. If pointer is nil, new empty value is generated.
 ptr2 to effect custom hook functions and hooker interface also omitnested.
+
+__remain__: Must be defined as `map[string]interface{}` in struct. Puts all unknown fields, destined for the struct into the `remain` field.
 
 ### Decode
 
