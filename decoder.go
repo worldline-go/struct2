@@ -73,6 +73,9 @@ type Decoder struct {
 
 	// OutputCamelCase will convert map keys to camel case.
 	OuputCamelCase bool
+
+	// NoRemainFields will fail if there are extra fields in the input, that are not in the output.
+	NoRemainFields bool
 }
 
 func (d *Decoder) SetTagName(t string) *Decoder {

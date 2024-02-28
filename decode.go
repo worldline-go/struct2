@@ -1023,16 +1023,20 @@ func (d *Decoder) decodeStructFromMap(name string, dataVal, val reflect.Value) e
 
 	// If we have a "remain"-tagged field and we have unused keys then
 	// we put the unused keys directly into the remain field.
-	if remainField != nil && len(dataValKeysUnused) > 0 {
-		// Build a map of only the unused values
-		remain := map[interface{}]interface{}{}
-		for key := range dataValKeysUnused {
-			remain[key] = dataVal.MapIndex(reflect.ValueOf(key)).Interface()
-		}
+	if len(dataValKeysUnused) > 0 {
+		if remainField != nil {
+			// Build a map of only the unused values
+			remain := map[interface{}]interface{}{}
+			for key := range dataValKeysUnused {
+				remain[key] = dataVal.MapIndex(reflect.ValueOf(key)).Interface()
+			}
 
-		// Decode it as-if we were just decoding this map onto our map.
-		if err := d.decodeMap(name, remain, remainField.val); err != nil {
-			errors = append(errors, err)
+			// Decode it as-if we were just decoding this map onto our map.
+			if err := d.decodeMap(name, remain, remainField.val); err != nil {
+				errors = append(errors, err)
+			}
+		} else if d.NoRemainFields {
+			errors = append(errors, fmt.Errorf("no remain field for unused keys: %v", dataValKeysUnused))
 		}
 	}
 
