@@ -5,6 +5,12 @@ import (
 	"testing"
 )
 
+type stringerValue int
+
+func (s stringerValue) String() string {
+	return "stringerValue"
+}
+
 func str2Ptr(s string) *string {
 	return &s
 }
@@ -19,6 +25,11 @@ func TestDecoder_Map(t *testing.T) {
 	}
 	type TrainNoPtr2 struct {
 		Wagon *int `struct:"wagon"`
+	}
+
+	type TrainStringTags struct {
+		Wagon    *int          `struct:"wagon,string"`
+		Stringer stringerValue `struct:"stringer,string"`
 	}
 
 	train := Train{
@@ -247,6 +258,25 @@ func TestDecoder_Map(t *testing.T) {
 					map[string]interface{}{
 						"wagon": 5,
 					},
+				},
+			},
+		},
+		{
+			name: "string tags",
+			args: args{
+				s: struct {
+					Train TrainStringTags `struct:"train"`
+				}{
+					Train: TrainStringTags{
+						Wagon:    int2Ptr(5),
+						Stringer: 1,
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"train": map[string]interface{}{
+					"wagon":    "5",
+					"stringer": "stringerValue",
 				},
 			},
 		},
