@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-// ToStringE casts an interface to a string type.
+// toStringE casts an interface to a string type.
 // Taken from github.com/spf13/cast. All rights reserved.
-func ToStringE(i interface{}) (string, error) {
+func toStringE(i interface{}) (string, error) {
 	i = indirectToStringerOrError(i)
 	switch s := i.(type) {
 	case string:

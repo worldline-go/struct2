@@ -38,7 +38,7 @@ func Example() {
 		Date:   types.Time{Time: d},
 	}
 
-	result := (&struct2.Decoder{}).SetTagName("json").Map(group) // default tag name is "struct"
+	result := new(struct2.Decoder).SetTagName("json").Map(group) // default tag name is "struct"
 
 	// fmt.Printf("%#v", result)
 	SortPrint(result)

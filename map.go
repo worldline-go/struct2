@@ -64,7 +64,7 @@ FIELDS:
 		}
 
 		if tagOpts.Has("string") {
-			s, err := ToStringE(val.Interface())
+			s, err := toStringE(val.Interface())
 			if err != nil {
 				continue
 			}
