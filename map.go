@@ -1,7 +1,6 @@
 package struct2
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 )
@@ -32,7 +31,7 @@ func (d *Decoder) convertMap(input interface{}, config configMap) map[string]int
 
 	out := make(map[string]interface{})
 
-	fields := []reflect.StructField{}
+	var fields []reflect.StructField
 
 	d.getFields(v, func(sf reflect.StructField) {
 		fields = append(fields, sf)
@@ -65,11 +64,11 @@ FIELDS:
 		}
 
 		if tagOpts.Has("string") {
-			s, ok := val.Interface().(fmt.Stringer)
-			if ok {
-				out[name] = s.String()
+			s, err := ToStringE(val.Interface())
+			if err != nil {
+				continue
 			}
-
+			out[name] = s
 			continue
 		}
 
