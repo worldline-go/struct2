@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-func (d *Decoder) GetFields(s interface{}) []string {
+func (d *Decoder) GetFields(s any) []string {
 	v := value2StructValue(reflect.ValueOf(s))
 
 	exportedFieldNames := []string{}

@@ -9,7 +9,7 @@ import (
 
 // toStringE casts an interface to a string type.
 // Taken from github.com/spf13/cast. All rights reserved.
-func toStringE(i interface{}) (string, error) {
+func toStringE(i any) (string, error) {
 	i = indirectToStringerOrError(i)
 	switch s := i.(type) {
 	case string:
@@ -68,7 +68,7 @@ func toStringE(i interface{}) (string, error) {
 // indirectToStringerOrError returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil) or an implementation of fmt.Stringer
 // or error,
-func indirectToStringerOrError(a interface{}) interface{} {
+func indirectToStringerOrError(a any) any {
 	if a == nil {
 		return nil
 	}
@@ -77,8 +77,9 @@ func indirectToStringerOrError(a interface{}) interface{} {
 	fmtStringerType := reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
 
 	v := reflect.ValueOf(a)
-	for !v.Type().Implements(fmtStringerType) && !v.Type().Implements(errorType) && v.Kind() == reflect.Ptr && !v.IsNil() {
+	for !v.Type().Implements(fmtStringerType) && !v.Type().Implements(errorType) && v.Kind() == reflect.Pointer && !v.IsNil() {
 		v = v.Elem()
 	}
+
 	return v.Interface()
 }

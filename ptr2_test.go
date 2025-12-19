@@ -7,12 +7,12 @@ import (
 
 func TestPtr2Concrete(t *testing.T) {
 	type args struct {
-		val interface{}
+		val any
 	}
 	tests := []struct {
 		name string
 		args args
-		want interface{}
+		want any
 	}{
 		{
 			name: "non pointer test",

@@ -6,9 +6,9 @@ import (
 
 // isNil return true if the given value is nil.
 //
-//   isNil(reflect.ValueOf(x))
+//	isNil(reflect.ValueOf(x))
 func isNil(v reflect.Value) bool {
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		return v.IsNil()
 	}
 
@@ -17,7 +17,7 @@ func isNil(v reflect.Value) bool {
 
 func value2StructValue(v reflect.Value) reflect.Value {
 	// pointer to struct
-	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+	for v.Kind() == reflect.Pointer || v.Kind() == reflect.Interface {
 		if v.Kind() == reflect.Interface {
 			v = reflect.Indirect(v)
 		}

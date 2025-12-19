@@ -37,13 +37,13 @@ func TestDecoder_Map(t *testing.T) {
 	}
 
 	type args struct {
-		s interface{}
+		s any
 	}
 	tests := []struct {
 		name    string
 		decoder Decoder
 		args    args
-		want    map[string]interface{}
+		want    map[string]any
 	}{
 
 		{
@@ -57,7 +57,7 @@ func TestDecoder_Map(t *testing.T) {
 					unexported: "unexported",
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name": "abc",
 			},
 		},
@@ -72,7 +72,7 @@ func TestDecoder_Map(t *testing.T) {
 					Ptr:  str2Ptr("pointer"),
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name": "abc",
 				"Ptr":  str2Ptr("pointer"),
 			},
@@ -98,7 +98,7 @@ func TestDecoder_Map(t *testing.T) {
 					Ptr:  str2Ptr("pointer"),
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name": "abc",
 				"ptr":  "pointer",
 			},
@@ -120,10 +120,10 @@ func TestDecoder_Map(t *testing.T) {
 					}{Wagon: int2Ptr(5)},
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name": "abc",
 				"ptr":  "pointer",
-				"train": map[string]interface{}{
+				"train": map[string]any{
 					"wagon": 5,
 				},
 			},
@@ -141,7 +141,7 @@ func TestDecoder_Map(t *testing.T) {
 					Train: &train,
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name":  "abc",
 				"ptr":   "pointer",
 				"train": train,
@@ -160,10 +160,10 @@ func TestDecoder_Map(t *testing.T) {
 					Train: &[]Train{train},
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name":  "abc",
 				"ptr":   "pointer",
-				"train": []interface{}{map[string]interface{}{"wagon": 5}},
+				"train": []any{map[string]any{"wagon": 5}},
 			},
 		},
 		{
@@ -180,10 +180,10 @@ func TestDecoder_Map(t *testing.T) {
 					Train: TrainNoPtr2{},
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name": "abc",
 				"ptr":  "pointer",
-				"train": map[string]interface{}{
+				"train": map[string]any{
 					"wagon": 0,
 				},
 			},
@@ -208,12 +208,12 @@ func TestDecoder_Map(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name":     "abc",
-				"train":    map[string]interface{}{},
-				"trainPtr": map[string]interface{}{},
-				"trains": []interface{}{
-					map[string]interface{}{},
+				"train":    map[string]any{},
+				"trainPtr": map[string]any{},
+				"trains": []any{
+					map[string]any{},
 				},
 			},
 		},
@@ -245,17 +245,17 @@ func TestDecoder_Map(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name":  "abc",
 				"Name2": "def",
-				"train": map[string]interface{}{
+				"train": map[string]any{
 					"wagon": 5,
 				},
-				"trainPtr": map[string]interface{}{
+				"trainPtr": map[string]any{
 					"wagon": 5,
 				},
-				"trains": []interface{}{
-					map[string]interface{}{
+				"trains": []any{
+					map[string]any{
 						"wagon": 5,
 					},
 				},
@@ -273,8 +273,8 @@ func TestDecoder_Map(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
-				"train": map[string]interface{}{
+			want: map[string]any{
+				"train": map[string]any{
 					"wagon":    "5",
 					"stringer": "stringerValue",
 				},
@@ -300,13 +300,13 @@ func TestDecoder_MapOmitNested(t *testing.T) {
 	}
 
 	type args struct {
-		s interface{}
+		s any
 	}
 	tests := []struct {
 		name    string
 		decoder Decoder
 		args    args
-		want    map[string]interface{}
+		want    map[string]any
 	}{
 		{
 			name: "deep test with omitnested",
@@ -321,7 +321,7 @@ func TestDecoder_MapOmitNested(t *testing.T) {
 					Train: &train,
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name":  "abc",
 				"ptr":   "pointer",
 				"train": train,
@@ -330,7 +330,7 @@ func TestDecoder_MapOmitNested(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.decoder.MapOmitNested(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.decoder.Map(tt.args.s, WithOmitNested()); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Decoder.Map() = %#v, want %#v", got, tt.want)
 			}
 		})
@@ -339,18 +339,18 @@ func TestDecoder_MapOmitNested(t *testing.T) {
 
 func TestDecoder_CustomHook(t *testing.T) {
 	type args struct {
-		s interface{}
+		s any
 	}
 	tests := []struct {
 		name    string
 		decoder Decoder
 		args    args
-		want    map[string]interface{}
+		want    map[string]any
 	}{
 		{
 			name: "simple test",
 			decoder: Decoder{
-				Hooks: []HookFunc{func(v reflect.Value) (interface{}, error) {
+				Hooks: []HookFunc{func(v reflect.Value) (any, error) {
 					if v.Kind() == reflect.String {
 						return "str_" + v.Interface().(string), nil
 					}
@@ -364,7 +364,7 @@ func TestDecoder_CustomHook(t *testing.T) {
 					Name: "abc",
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"name": "str_abc",
 			},
 		},
@@ -376,4 +376,109 @@ func TestDecoder_CustomHook(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDecoder_MapWithSlice(t *testing.T) {
+	type Train struct {
+		Wagon *int `struct:"wagon,ptr2"`
+	}
+
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		input any
+		opts  []optionMap
+		want  []map[string]any
+	}{
+		{
+			name:  "empty slice",
+			input: []struct{}{},
+			want:  []map[string]any{},
+		},
+		{
+			name: "simple slice",
+			input: []struct {
+				Name string `struct:"name"`
+			}{
+				{Name: "a"},
+				{Name: "b"},
+			},
+			want: []map[string]any{
+				{"name": "a"},
+				{"name": "b"},
+			},
+		},
+		{
+			name: "slice with nil element",
+			input: []*struct {
+				Name string `struct:"name"`
+			}{
+				{Name: "a"},
+				nil,
+			},
+			want: []map[string]any{
+				{"name": "a"},
+				nil,
+			},
+		},
+		{
+			name: "slice with ptr2",
+			input: []struct {
+				Name string  `struct:"name"`
+				Ptr  *string `struct:"ptr,ptr2"`
+			}{
+				{Name: "abc", Ptr: str2Ptr("pointer")},
+			},
+			want: []map[string]any{
+				{"name": "abc", "ptr": "pointer"},
+			},
+		},
+		{
+			name: "slice with omitnested",
+			input: []struct {
+				Train *Train `struct:"train,ptr2"`
+			}{
+				{Train: &Train{Wagon: int2Ptr(5)}},
+			},
+			opts: []optionMap{WithOmitNested()},
+			want: []map[string]any{
+				{"train": Train{Wagon: int2Ptr(5)}},
+			},
+		},
+		{
+			name: "slice of any with structs",
+			input: []any{
+				struct {
+					Name string `struct:"name"`
+				}{Name: "test"},
+				struct {
+					Value int `struct:"value"`
+				}{Value: 42},
+			},
+			want: []map[string]any{
+				{"name": "test"},
+				{"value": 42},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var d Decoder
+			got := d.MapSlice(tt.input, tt.opts...)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MapWithSlice() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDecoder_MapWithSlicePanic(t *testing.T) {
+	var d Decoder
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic")
+		}
+	}()
+
+	d.MapSlice("not a slice")
 }

@@ -19,7 +19,7 @@ func Example_customHook() {
 
 	decoder := struct2.Decoder{
 		TagName: "db",
-		Hooks: []struct2.HookFunc{func(v reflect.Value) (interface{}, error) {
+		Hooks: []struct2.HookFunc{func(v reflect.Value) (any, error) {
 			if v.Kind() == reflect.String {
 				return "str_" + v.Interface().(string), nil
 			}

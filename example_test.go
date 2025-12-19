@@ -6,10 +6,9 @@ import (
 	"time"
 
 	"github.com/worldline-go/struct2"
-	"github.com/worldline-go/struct2/types"
 )
 
-func SortPrint(m map[string]interface{}) {
+func sortPrint(m map[string]any) {
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
@@ -26,7 +25,7 @@ func Example() {
 		ID     int        `json:"id"`
 		Name   string     `json:"name"`
 		Colors []string   `json:"colors"`
-		Date   types.Time `json:"time"`
+		Date   timeCustom `json:"time"`
 	}
 
 	d, _ := time.Parse(time.RFC3339, "2006-01-02T15:04:05Z")
@@ -35,13 +34,13 @@ func Example() {
 		ID:     1,
 		Name:   "Reds",
 		Colors: []string{"Crimson", "Red", "Ruby", "Maroon"},
-		Date:   types.Time{Time: d},
+		Date:   timeCustom{Time: d},
 	}
 
 	result := new(struct2.Decoder).SetTagName("json").Map(group) // default tag name is "struct"
 
 	// fmt.Printf("%#v", result)
-	SortPrint(result)
+	sortPrint(result)
 	// Output:
 	// Type: []string, Value: [Crimson Red Ruby Maroon]
 	// Type: int, Value: 1

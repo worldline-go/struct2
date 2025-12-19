@@ -25,20 +25,20 @@ func TestDecoder_Decode(t *testing.T) {
 		NoRemainFields        bool
 	}
 	type args struct {
-		input  interface{}
-		output interface{}
+		input  any
+		output any
 	}
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
 		wantErr error
-		want    interface{}
+		want    any
 	}{
 		{
 			name: "test",
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"test": "test",
 				},
 				output: &struct {
@@ -58,12 +58,12 @@ func TestDecoder_Decode(t *testing.T) {
 				WeaklyTypedInput: true,
 			},
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"string":  "test",
 					"bool":    "True",
 					"int":     1,
 					"float64": 1.1,
-					"float32": func() interface{} { return 1.1 }(),
+					"float32": func() any { return 1.1 }(),
 					"byte":    1,
 					"rune":    '#',
 					"uint":    1,
@@ -75,7 +75,7 @@ func TestDecoder_Decode(t *testing.T) {
 					"int16":   1,
 					"int32":   1,
 					"int64":   1,
-					"time":    func() interface{} { return timeNow }(),
+					"time":    func() any { return timeNow }(),
 				},
 				output: &struct {
 					String  string    `struct:"string"`
@@ -139,7 +139,7 @@ func TestDecoder_Decode(t *testing.T) {
 		{
 			name: "nil struct",
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"abc": "x",
 				},
 				output: &struct {
@@ -161,7 +161,7 @@ func TestDecoder_Decode(t *testing.T) {
 			name: "hook test",
 			fields: fields{
 				Hooks: []HookFunc{
-					func(v reflect.Value) (interface{}, error) {
+					func(v reflect.Value) (any, error) {
 						if v.Kind() == reflect.String {
 							return v.Interface().(string) + "_hooked", nil
 						}
@@ -171,7 +171,7 @@ func TestDecoder_Decode(t *testing.T) {
 				},
 			},
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"test": "test",
 				},
 				output: &struct {
@@ -191,7 +191,7 @@ func TestDecoder_Decode(t *testing.T) {
 				WeaklyDashUnderscore: true,
 			},
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"test_x": "test",
 				},
 				output: &struct {
@@ -211,7 +211,7 @@ func TestDecoder_Decode(t *testing.T) {
 				WeaklyIgnoreSeperator: true,
 			},
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"test_x": "test",
 				},
 				output: &struct {
@@ -230,7 +230,7 @@ func TestDecoder_Decode(t *testing.T) {
 			fields: fields{
 				WeaklyIgnoreSeperator: true,
 				HooksDecode: []HookDecodeFunc{
-					func(t1, t2 reflect.Type, data interface{}) (interface{}, error) {
+					func(t1, t2 reflect.Type, data any) (any, error) {
 						if t2 != reflect.TypeOf(time.Duration(0)) {
 							return data, nil
 						}
@@ -251,7 +251,7 @@ func TestDecoder_Decode(t *testing.T) {
 				},
 			},
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"test_x": "5s",
 					"test_y": 1_000_000_000,
 				},
@@ -273,18 +273,18 @@ func TestDecoder_Decode(t *testing.T) {
 			name: "copy []byte",
 			args: args{
 				input:  append(make([]byte, 0, 100), []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}...),
-				output: func() interface{} { v := make([]byte, 0, 10); return &v }(),
+				output: func() any { v := make([]byte, 0, 10); return &v }(),
 			},
 			wantErr: nil,
-			want:    func() interface{} { v := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; return &v }(),
+			want:    func() any { v := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; return &v }(),
 		},
 		{
 			name: "remain",
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"test":       "test",
-					"testStruct": map[string]interface{}{"test": "test", "other": "other"},
-					"testArray": []map[string]interface{}{
+					"testStruct": map[string]any{"test": "test", "other": "other"},
+					"testArray": []map[string]any{
 						{"test": "test", "other": "other"},
 					},
 					"other":   "other",
@@ -294,13 +294,13 @@ func TestDecoder_Decode(t *testing.T) {
 					Test       string
 					TestStruct struct {
 						Test   string
-						Remain map[string]interface{} `struct:",remain"`
+						Remain map[string]any `struct:",remain"`
 					}
 					TestArray []struct {
 						Test   string
-						Remain map[string]interface{} `struct:",remain"`
+						Remain map[string]any `struct:",remain"`
 					}
-					Remain map[string]interface{} `struct:",remain"`
+					Remain map[string]any `struct:",remain"`
 				}{},
 			},
 			wantErr: nil,
@@ -308,32 +308,32 @@ func TestDecoder_Decode(t *testing.T) {
 				Test       string
 				TestStruct struct {
 					Test   string
-					Remain map[string]interface{} `struct:",remain"`
+					Remain map[string]any `struct:",remain"`
 				}
 				TestArray []struct {
 					Test   string
-					Remain map[string]interface{} `struct:",remain"`
+					Remain map[string]any `struct:",remain"`
 				}
-				Remain map[string]interface{} `struct:",remain"`
+				Remain map[string]any `struct:",remain"`
 			}{
 				Test: "test",
 				TestStruct: struct {
 					Test   string
-					Remain map[string]interface{} `struct:",remain"`
+					Remain map[string]any `struct:",remain"`
 				}{
 					Test:   "test",
-					Remain: map[string]interface{}{"other": "other"},
+					Remain: map[string]any{"other": "other"},
 				},
 				TestArray: []struct {
 					Test   string
-					Remain map[string]interface{} `struct:",remain"`
+					Remain map[string]any `struct:",remain"`
 				}{
 					{
 						Test:   "test",
-						Remain: map[string]interface{}{"other": "other"},
+						Remain: map[string]any{"other": "other"},
 					},
 				},
-				Remain: map[string]interface{}{
+				Remain: map[string]any{
 					"other":   "other",
 					"another": "another",
 				},
@@ -345,7 +345,7 @@ func TestDecoder_Decode(t *testing.T) {
 				NoRemainFields: true,
 			},
 			args: args{
-				input: map[string]interface{}{
+				input: map[string]any{
 					"test":   "test",
 					"test_x": "testx",
 					"other":  "other",
@@ -382,7 +382,7 @@ func TestDecoder_Decode(t *testing.T) {
 				WeaklyIgnoreSeperator: tt.fields.WeaklyIgnoreSeperator,
 				NoRemainFields:        tt.fields.NoRemainFields,
 			}
-			if err := d.Decode(tt.args.input, tt.args.output); !reflect.DeepEqual(err, tt.wantErr) {
+			if err := d.Decode(tt.args.input, tt.args.output); (err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error()) || (err == nil && tt.wantErr != nil) || (err != nil && tt.wantErr == nil) {
 				t.Errorf("Decoder.Decode() error = %v, wantErr %v", err, tt.wantErr)
 
 				return

@@ -43,11 +43,11 @@ decoder := struct2.Decoder{
     TagName: "db",
 }
 
-// get map[string]interface{}
+// get map[string]any
 result := decoder.Map(group)
 
 // or use one line
-// result := (&struct2.Decoder{}).SetTagName("db").Map(group) // default tag name is "struct"
+// result := new(struct2.Decoder).SetTagName("db").Map(group) // default tag name is "struct"
 ```
 
 Custom decoder can be use in struct which have `struct2.Hooker` interface.  
@@ -62,7 +62,7 @@ __omitnested__: very helpful to don't want to touch data.
 __ptr2__: convert pointer to the concrete value. If pointer is nil, new empty value is generated.
 ptr2 to effect custom hook functions and hooker interface also omitnested.
 
-__remain__: Must be defined as `map[string]interface{}` in struct. Puts all unknown fields, destined for the struct into the `remain` field.
+__remain__: Must be defined as `map[string]any` in struct. Puts all unknown fields, destined for the struct into the `remain` field.
 
 ### Decode
 

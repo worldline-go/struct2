@@ -12,11 +12,11 @@ var ErrContinueHook = errors.New("continue to decode")
 
 // Hooker interface for structs.
 type Hooker interface {
-	Struct2Hook() interface{}
+	Struct2Hook() any
 }
 
 // HookFunc get reflect.Value to modify custom in decoder.
-type HookFunc func(reflect.Value) (interface{}, error)
+type HookFunc func(reflect.Value) (any, error)
 
 // HookDecodeFunc get input, output and data and return modified data.
-type HookDecodeFunc func(reflect.Type, reflect.Type, interface{}) (interface{}, error)
+type HookDecodeFunc func(reflect.Type, reflect.Type, any) (any, error)

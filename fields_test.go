@@ -7,7 +7,7 @@ import (
 
 func TestDecoder_GetFields(t *testing.T) {
 	type args struct {
-		s interface{}
+		s any
 	}
 	tests := []struct {
 		name    string

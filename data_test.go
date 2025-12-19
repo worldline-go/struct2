@@ -8,8 +8,20 @@ import (
 	"time"
 
 	"github.com/worldline-go/struct2"
-	"github.com/worldline-go/struct2/types"
 )
+
+type timeCustom struct {
+	time.Time
+}
+
+var _ struct2.Hooker = timeCustom{}
+
+// Struct2Hook hook function for decode struct2.
+func (t timeCustom) Struct2Hook() any {
+	return t.Time
+}
+
+// ////////////////////////////////////////////////////////
 
 type ColorGroup struct {
 	ID     int      `db:"id"`
@@ -17,7 +29,7 @@ type ColorGroup struct {
 	Colors []string `db:"colors"`
 	// custom type with implemented Hooker interface
 	// covertion result to time.Time
-	Date types.Time `db:"time"`
+	Date timeCustom `db:"time"`
 	// CustomValue will be pointer to int
 	CustomValue *int `db:"custom_value,ptr2"`
 	// Inner field will be flatten, so override ID from root
@@ -41,13 +53,13 @@ type ColorGroupData struct {
 	Time time.Time
 }
 
-func (d ColorGroupData) Data() interface{} {
+func (d ColorGroupData) Data() any {
 	v := 5
 	return ColorGroup{
 		ID:          1,
 		Name:        "Reds",
 		Colors:      []string{"Crimson", "Red", "Ruby", "Maroon"},
-		Date:        types.Time{Time: d.Time},
+		Date:        timeCustom{Time: d.Time},
 		CustomValue: &v,
 		Inner: Inner{
 			ID: 2,
@@ -60,8 +72,8 @@ func (d ColorGroupData) Data() interface{} {
 	}
 }
 
-func (d ColorGroupData) MapData() interface{} {
-	return map[string]interface{}{
+func (d ColorGroupData) MapData() any {
+	return map[string]any{
 		"id":           2,
 		"name":         "Reds",
 		"colors":       []string{"Crimson", "Red", "Ruby", "Maroon"},
@@ -77,8 +89,8 @@ func (d ColorGroupData) MapData() interface{} {
 // defination of example data
 
 type exampleData interface {
-	Data() interface{}
-	MapData() interface{}
+	Data() any
+	MapData() any
 }
 
 var mapExamples = map[string]exampleData{

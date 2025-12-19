@@ -9,19 +9,58 @@ type configMap struct {
 	omitNested bool
 }
 
-// MapOmitNested converts given struct to the map[string]interface{} without looking nested object.
-// Panic if input not a struct type.
-func (d *Decoder) MapOmitNested(input interface{}) map[string]interface{} {
-	return d.convertMap(input, configMap{omitNested: true})
+type optionMap func(*configMap)
+
+func WithOmitNested() optionMap {
+	return func(c *configMap) {
+		c.omitNested = true
+	}
 }
 
-// Map converts given struct to the map[string]interface{}.
-// Panic if input not a struct type.
-func (d *Decoder) Map(input interface{}) map[string]interface{} {
-	return d.convertMap(input, configMap{})
+// MapOmitNested converts given struct to the map[string]any omitting nested structs and maps.
+//
+// Deprecated: use Map with WithOmitNested option instead.
+func (d *Decoder) MapOmitNested(input any) map[string]any {
+	return d.Map(input, WithOmitNested())
 }
 
-func (d *Decoder) convertMap(input interface{}, config configMap) map[string]interface{} {
+// MapSlice converts given slice of structs to []map[string]any.
+// Panic if input not a slice or array type.
+func (d *Decoder) MapSlice(input any, opts ...optionMap) []map[string]any {
+	config := configMap{}
+	for _, opt := range opts {
+		opt(&config)
+	}
+
+	inputV := reflect.ValueOf(input)
+	if isNil(inputV) {
+		return nil
+	}
+
+	if inputV.Kind() != reflect.Slice && inputV.Kind() != reflect.Array {
+		panic("input not a slice or array type")
+	}
+
+	out := make([]map[string]any, inputV.Len())
+	for i := 0; i < inputV.Len(); i++ {
+		out[i] = d.convertMap(inputV.Index(i).Interface(), config)
+	}
+
+	return out
+}
+
+// Map converts given struct to the map[string]any.
+// Panic if input not a struct type.
+func (d *Decoder) Map(input any, opts ...optionMap) map[string]any {
+	config := configMap{}
+	for _, opt := range opts {
+		opt(&config)
+	}
+
+	return d.convertMap(input, config)
+}
+
+func (d *Decoder) convertMap(input any, config configMap) map[string]any {
 	inputV := reflect.ValueOf(input)
 	if isNil(inputV) {
 		return nil
@@ -29,7 +68,7 @@ func (d *Decoder) convertMap(input interface{}, config configMap) map[string]int
 
 	v := value2StructValue(inputV)
 
-	out := make(map[string]interface{})
+	out := make(map[string]any)
 
 	var fields []reflect.StructField
 
@@ -46,7 +85,7 @@ FIELDS:
 		}
 
 		isSubStruct := false
-		var finalVal interface{}
+		var finalVal any
 
 		tagName, tagOpts := d.parseTag(field)
 		if tagName != "" {
@@ -59,7 +98,7 @@ FIELDS:
 			continue
 		}
 
-		if d.OmitNilPtr && val.Kind() == reflect.Ptr && val.IsNil() {
+		if d.OmitNilPtr && val.Kind() == reflect.Pointer && val.IsNil() {
 			continue
 		}
 
@@ -101,7 +140,7 @@ FIELDS:
 		}
 
 		if hook != nil {
-			if val.Type().Kind() == reflect.Ptr && val.IsNil() {
+			if val.Type().Kind() == reflect.Pointer && val.IsNil() {
 				// nil pointer call to value receiver
 				out[name] = nil
 
@@ -123,7 +162,7 @@ FIELDS:
 			finalVal = d.nested(val)
 
 			v := reflect.ValueOf(val.Interface())
-			if v.Kind() == reflect.Ptr {
+			if v.Kind() == reflect.Pointer {
 				v = v.Elem()
 			}
 
@@ -136,8 +175,8 @@ FIELDS:
 		}
 
 		if isSubStruct && (tagOpts.Has("flatten")) {
-			for k := range finalVal.(map[string]interface{}) {
-				out[k] = finalVal.(map[string]interface{})[k]
+			for k := range finalVal.(map[string]any) {
+				out[k] = finalVal.(map[string]any)[k]
 			}
 		} else {
 			if ptr2 {
@@ -152,11 +191,11 @@ FIELDS:
 }
 
 // nested retrieves recursively all types for the given value and returns the nested value.
-func (d *Decoder) nested(val reflect.Value) interface{} {
-	var finalVal interface{}
+func (d *Decoder) nested(val reflect.Value) any {
+	var finalVal any
 
 	v := reflect.ValueOf(val.Interface())
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
 
@@ -180,10 +219,10 @@ func (d *Decoder) nested(val reflect.Value) interface{} {
 		mapElem := val.Type()
 
 		switch val.Type().Kind() {
-		case reflect.Ptr, reflect.Array, reflect.Map,
+		case reflect.Pointer, reflect.Array, reflect.Map,
 			reflect.Slice, reflect.Chan:
 			mapElem = val.Type().Elem()
-			if mapElem.Kind() == reflect.Ptr {
+			if mapElem.Kind() == reflect.Pointer {
 				mapElem = mapElem.Elem()
 			}
 		}
@@ -192,7 +231,7 @@ func (d *Decoder) nested(val reflect.Value) interface{} {
 		// map[string][]StructType,
 		if mapElem.Kind() == reflect.Struct ||
 			(mapElem.Kind() == reflect.Slice && mapElem.Elem().Kind() == reflect.Struct) {
-			m := make(map[string]interface{}, val.Len())
+			m := make(map[string]any, val.Len())
 			for _, k := range val.MapKeys() {
 				m[k.String()] = d.nested(val.MapIndex(k))
 			}
@@ -205,7 +244,7 @@ func (d *Decoder) nested(val reflect.Value) interface{} {
 		// TODO(arslan): should this be optional?
 		finalVal = val.Interface()
 	case reflect.Slice, reflect.Array:
-		if val.Type().Kind() == reflect.Ptr {
+		if val.Type().Kind() == reflect.Pointer {
 			val = val.Elem()
 		}
 
@@ -220,13 +259,13 @@ func (d *Decoder) nested(val reflect.Value) interface{} {
 		// []string, co... We only iterate further if it's a struct.
 		// i.e []foo or []*foo
 		if val.Type().Elem().Kind() != reflect.Struct &&
-			!(val.Type().Elem().Kind() == reflect.Ptr && val.Type().Elem().Elem().Kind() == reflect.Struct) {
+			!(val.Type().Elem().Kind() == reflect.Pointer && val.Type().Elem().Elem().Kind() == reflect.Struct) {
 			finalVal = val.Interface()
 
 			break
 		}
 
-		slices := make([]interface{}, val.Len())
+		slices := make([]any, val.Len())
 		for x := 0; x < val.Len(); x++ {
 			slices[x] = d.nested(val.Index(x))
 		}

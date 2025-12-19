@@ -7,7 +7,7 @@ import (
 
 func Test_interface2StructValue(t *testing.T) {
 	type args struct {
-		s interface{}
+		s any
 	}
 	tests := []struct {
 		name      string

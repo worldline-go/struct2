@@ -2,9 +2,9 @@ package struct2
 
 import "reflect"
 
-func Ptr2Concrete(val interface{}) interface{} {
+func Ptr2Concrete(val any) any {
 	v := reflect.ValueOf(val)
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		if !v.IsNil() {
 			return v.Elem().Interface()
 		}
